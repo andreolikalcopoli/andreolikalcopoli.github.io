@@ -578,7 +578,7 @@
                 if(partic.key == "chatMessage"){
                   text = partic.child("text").val();
                   texts.push(text);
-                  whoSent.push(partic.child("sender").val());
+                  whoSent.push(partic.child("senderName").val());
                 }
                 // if(partic.key == "username"){
                 //   if(partic.val() == localStorage.getItem("name")){
@@ -598,7 +598,7 @@
             console.log(texts);
             console.log(whoSent);
             for(var i = 0; i < texts.length; i++){
-              if(whoSent[i] == localStorage.getItem("myID")){
+              if(whoSent[i] == localStorage.getItem("name")){
                 var div = document.getElementById("pinMyMsg"),
                 clone = div.cloneNode(true);
                 console.log(clone);
