@@ -461,6 +461,12 @@
         }
         console.log(messages);
         for (var i = 0; i < messages.length; i++) {
+          const starCountRef1 = ref(db, "users/"+messages[i].senderName);
+          onValue(starCountRef1, (snapshot) => {
+          snapshot.forEach(function (child) {
+            console.log(child.key);
+            });
+          });
           var div = document.querySelector(".oneChat"),
             clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
           clone.setAttribute("sender", messages[i].chatID);

@@ -568,6 +568,9 @@
         // console.log(id);
         texts = [];
         whoSent = [];
+        // for(var i = 0; i < document.getElementById("pinContainer").childElementCount; i++){
+        //   document.getElementById("pinnedContainer").firstElementChild.remove();
+        // }
         const starCountRef = ref(db, "chat/" + id + "/pinnedMessages");
         onValue(starCountRef, (snapshot) => {
           console.log(snapshot.val());
