@@ -455,6 +455,7 @@
           messages[i] = messages[min];
           messages[min] = temp;
         }
+        console.log(messages);
         for (var i = 0; i < messages.length; i++) {
           var div = document.querySelector(".oneChat"),
             clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
