@@ -17,6 +17,7 @@
           <div id="logoImg"></div>
         </div>
         <div id="header">BionixMe</div>
+        <div id="loginTop">LOGIN</div>
         <div id="Login">REGISTER</div>
       </div>
       <div id="botContent">
@@ -58,6 +59,11 @@
     }
     #header {
       flex: 10;
+    }
+    #loginTop{
+      flex:1;
+      margin:20px;
+      cursor: pointer;
     }
     #login {
       flex: 1;
@@ -143,7 +149,9 @@
         appId: "1:780488983474:web:0864b3f14ae9e695851aab",
         measurementId: "G-FECQ1GHF4H",
       };
-
+      $("#loginTop").click(function(){
+        window.location = "index.html";
+      })
       // Initialize Firebase
       const app = initializeApp(firebaseConfig);
       const auth = getAuth();
