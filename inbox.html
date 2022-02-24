@@ -353,6 +353,7 @@
             // console.log(child.key);
             const starCountRef1 = ref(db, "infoChat/"+child.key);
             onValue(starCountRef1, (snapshot) => {
+              console.log("USO SAM");
               var p = "Me";
               var o = "me";
               var text = "";
