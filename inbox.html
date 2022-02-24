@@ -461,19 +461,20 @@
         }
         console.log(messages);
         for (var i = 0; i < messages.length; i++) {
+          var name = "";
           const starCountRef1 = ref(db, "users/"+messages[i].senderName);
           onValue(starCountRef1, (snapshot) => {
           snapshot.forEach(function (child) {
             // console.log(child.key);
             if(child.key == "data"){
-              console.log(child.child("name").val());
+              name = child.child("name").val();
             }
             });
           });
           var div = document.querySelector(".oneChat"),
             clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
           clone.setAttribute("sender", messages[i].chatID);
-          clone.children[0].children[0].innerHTML = messages[i].senderName;
+          clone.children[0].children[0].innerHTML = name;
           clone.children[0].children[1].innerHTML = messages[i].time;
           clone.children[1].innerHTML = messages[i].text;
           document.getElementById("inboxContainer").appendChild(clone);
