@@ -1,0 +1,218 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=x, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins"
+      rel="stylesheet"
+    />
+    <title>Notifications</title>
+</head>
+<body>
+    <div id="wholeContend">
+        <div id="topContent">
+          <div id="logo">
+            <div id="logoImg"></div>
+          </div>
+          <div id="header">BionixMe</div>
+          <div class="topOne" id="chat">CHAT</div>
+          <div class="topOne" id="post">POST</div>
+          <div class="topOne" id="icon">ICON</div>
+          <div class="topOne" id="Login">NOTIFICATIONS</div>
+        </div>
+        <div id="botContent">
+            <div id="formNot">
+                <div class="inputs"><input type="text" placeholder="Date (2022-2-10 23:41)" id="dateInput" name="fname"></div>
+                <div class="inputs"><input type="text" placeholder="Name" id="nameInput" name="fname"></div>
+                <div class="inputs"><input type="text" placeholder="Message" id="messageInput" name="fname"></div>
+                <div id="sendBtn">SEND NOTIFICATION</div>
+            </div>
+            
+        </div>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Poppins";
+          }
+          #topContent {
+            width: 100%;
+            height: 15%;
+            display: flex;
+            color: #4c9dfb;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.5em;
+            background-color: #f6f6f6;
+          }
+          #logo {
+            flex: 2;
+          }
+          #logoImg {
+            background: url("images/logo.png");
+            width: 50px;
+            height: 50px;
+            margin-left: 25px;
+            background-size: cover;
+          }
+          #header {
+            flex: 10;
+          }
+          .topOne {
+            flex: 2;
+            cursor: pointer;
+          }
+          #login{
+              margin-right: 20px;
+          }
+          #botContent {
+            height: 85%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          #formNot{
+              flex:1;
+              display: flex;
+              flex-direction: column;
+              width: 35%;
+              height: 60%;
+              background-color: #f6f6f6;
+              justify-content: center;
+              align-items: center;
+              border-radius: 10px;
+          }
+
+          input{
+              flex:1;
+              margin:10px;
+              height: 50px;
+              width: 350px;
+              border-radius: 10px;
+              border: none;
+              outline: none;
+              padding: 10px;
+          }
+          #dateInput{
+              margin-top: 20px;
+          }
+          #sendBtn{
+              height: 50px;
+              width: 350px;
+              background-color: #4c9dfb;
+              color: white;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin: 20px;
+              border-radius: 10px;
+              font-weight: bold;
+          }
+    </style>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-messaging.js";
+        import { onBackgroundMessage } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-messaging-sw.js";
+        import {
+        getDatabase,
+        ref,
+        onValue,
+        set,
+        push,
+      } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+  
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyBe2ikeK1R0fv9NPloMaLYE3-xc_raIW7o",
+          authDomain: "app-healthdata.firebaseapp.com",
+          databaseURL: "https://app-healthdata-default-rtdb.firebaseio.com",
+          projectId: "app-healthdata",
+          storageBucket: "app-healthdata.appspot.com",
+          messagingSenderId: "780488983474",
+          appId: "1:780488983474:web:0864b3f14ae9e695851aab",
+          measurementId: "G-FECQ1GHF4H",
+        };
+
+
+      const app = initializeApp(firebaseConfig);
+      const messaging = getMessaging();
+      const db = getDatabase();
+      var image;
+     $(document).ready(function () {
+        
+        });
+        $("#chat").click(function(){
+            window.location = "inbox.html";
+        })
+        $("#post").click(function(){
+            window.location = "createPost.html";
+        })
+        $("#Login").click(function(){
+            window.location = "notifications.html";
+        })
+        $("#icon").click(function(){
+            window.location = "icon.html";
+        })
+        $('#sendBtn').click(function(){
+            var date = document.getElementById("dateInput").value;
+            var one = date.split(" ")[0];
+            var two = date.split(" ")[1];
+            var year = one.split("-")[0];
+            var month = one.split("-")[1];
+            var day = one.split("-")[2];
+            var hour = two.split(":")[0];
+            var min = two.split(":")[1];
+            var name = document.getElementById("nameInput").value;
+            const starCountRef = ref(db, "users");
+            var token = "";
+            onValue(starCountRef, (snapshot) => {
+                snapshot.forEach(function (child) {
+                    if(child.child("data/name").val() == name){
+                        token = child.child("token").val()
+                        console.log(token);
+                    }
+                })
+            })
+            var p = document.getElementById("messageInput").value;
+            // console.log(p);
+            setInterval(
+    function() {
+        var d = new Date();
+        if(d.getDate() == day && d.getHours() == hour && d.getMinutes() == min){
+            let body = {
+            to: token,
+            notification:{
+                title: "Therapy Reminder!",
+                body: p,
+            }
+            }
+        let options={
+            method: "POST",
+            headers: new Headers({
+                Authorization: "key=AAAAtbjEw7I:APA91bE9kRWHE_l0XtJcDDtcoovMHOa9LD51pau6KUTUU59ArVTJYMggfsNPcJbv1CkCEgjqh7D2lHwP_Q-brJ3Gv_EC7YcVflQo4fZ41mnr8i8VlBcCmrTqMkXrJtywDU7fMu-rZJsd",
+                "Content-Type":"application/json"
+            }),
+            body: JSON.stringify(body)
+        }
+        fetch("https://fcm.googleapis.com/fcm/send", options).then(res=>{
+            console.log(res);
+            console.log("SENT");
+        }).catch(e=> console.log(e));
+        document.getElementById("nameInput").value = "";
+        document.getElementById("dateInput").value = "";
+        document.getElementById("messageInput").value = "";
+        }
+        }, 60 * 1000);
+        
+        });
+        
+    </script>
+</body>
+</html>
