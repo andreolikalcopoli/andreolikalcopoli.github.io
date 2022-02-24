@@ -17,6 +17,7 @@
           <div id="logoImg"></div>
         </div>
         <div id="header">BionixMe</div>
+        <div id="register">REGISTER</div>
         <div id="Login">LOGIN</div>
       </div>
       <div id="botContent">
@@ -56,6 +57,10 @@
     }
     #header {
       flex: 10;
+    }
+    #register{
+      flex:1;
+      margin:20px;
     }
     #login {
       flex: 1;
@@ -183,6 +188,9 @@
         console.log(errorMessage);
       });
     }
+      $("#register").click(function(){
+        window.location = "register.html";
+      })
       $("#submit").click(function(){
         myFunction();
       })
