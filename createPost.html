@@ -272,6 +272,8 @@
         document.getElementById("select").value = "Weight Problems";
       }
       $(document).ready(function () {
+        console.log(localStorage.getItem("name"));
+        console.log(localStorage.getItem("myID"));
         document
           .querySelector('input[type="file"]')
           .addEventListener("change", function () {
