@@ -342,10 +342,10 @@
           });
         });
         const starCountRef = ref(db, "userChats/"+localStorage.getItem("myID"));
-        console.log(localStorage.getItem("myID"));
+        // console.log(localStorage.getItem("myID"));
         onValue(starCountRef, (snapshot) => {
 
-          console.log("USO SAM");
+          // console.log("USO SAM");
           const data = snapshot.val();
           // console.log("OVO JE DATA");
           // console.log(data);
@@ -374,11 +374,11 @@
                 if(child.key == "lastMsgTime"){
                   time = child.val();
                 }
-                console.log(o);
+                // console.log(o);
                 const nameRef = ref(db, "users/" + o + "/data");
                 onValue(nameRef, (snapshot) => {
-                  console.log("TO");
-                  console.log(snapshot.key);
+                  // console.log("TO");
+                  // console.log(snapshot.key);
                 });
                 msg = new Message(
                   o,
@@ -387,7 +387,7 @@
                   time,
                   snapshot.key
                 )
-                console.log(msg);
+                // console.log(msg);
               });
               var b = false;
               for(var i = 0; i < blockedUsers.length; i++){
