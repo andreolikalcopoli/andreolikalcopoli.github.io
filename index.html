@@ -167,10 +167,12 @@
               name = child.val();
               localStorage.setItem('name', name);
               localStorage.setItem('myID', email);
+              console.log(localStorage.getItem("name"));
+              console.log(localStorage.getItem("myID"));
             }
           });
         });
-        window.location = "createPost.html";
+        // window.location = "createPost.html";
 
         // ...
       })
