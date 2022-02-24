@@ -464,7 +464,10 @@
           const starCountRef1 = ref(db, "users/"+messages[i].senderName);
           onValue(starCountRef1, (snapshot) => {
           snapshot.forEach(function (child) {
-            console.log(child.key);
+            // console.log(child.key);
+            if(child.key == "data"){
+              console.log(child.child("name").val());
+            }
             });
           });
           var div = document.querySelector(".oneChat"),
