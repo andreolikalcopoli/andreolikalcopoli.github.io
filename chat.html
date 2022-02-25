@@ -488,6 +488,7 @@
         push(ref(db, "doctors/" + localStorage.getItem("myID") + "/blocked"), {
           id: he,
         });
+        alert("User blocked!");
         window.location = "inbox.html?" + localStorage.getItem("myID");
       });
 

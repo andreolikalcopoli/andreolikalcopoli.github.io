@@ -1,0 +1,287 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins"
+      rel="stylesheet"
+    />
+    <title>Block List</title>
+  </head>
+  <body>
+    <div id="wholeContend">
+      <div id="topContent">
+        <div id="logo">
+          <div id="logoImg"></div>
+        </div>
+        <div id="header">BionixMe</div>
+        <div class="topOne" id="chat">CHAT</div>
+        <div class="topOne" id="blocked">BLOCKED</div>
+          <div class="topOne" id="post">POST</div>
+          <div class="topOne" id="icon">ICON</div>
+          <div class="topOne" id="Login">NOTIFICATIONS</div>
+      </div>
+      <div id="botContent">
+        <div id="inboxContainer">
+          <div class="oneChat">
+              <div class="name"></div>
+            <div class="message">
+                <div id="blockBtn" class="unblockBtn">UNBLOCK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Poppins";
+      }
+      #botBot {
+        flex: 1;
+        display: flex;
+        margin: 10px;
+        width: 90%;
+        height: 50px;
+      }
+      #writeMessage {
+        flex: 6;
+        background-color: #f6f6f6;
+        outline: none;
+        border: none;
+        width: 90%;
+        padding-left: 30px;
+        color: rgba(76, 157, 251, 0.7);
+        font-family: "Poppins";
+        font-weight: bold;
+        font-size: 1.3em;
+        border-radius: 10px;
+      }
+      ::placeholder {
+        color: rgba(76, 157, 251, 0.7);
+        font-family: "Poppins";
+        font-weight: bold;
+      }
+      #deleteBtnView{
+        flex:1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #deleteBtn{
+        background-color: white;
+        color: red;
+        border: 1px solid red;
+        width: 150px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: "Poppins";
+        font-weight: bold;
+        font-size: 1.2em;
+        transition: 0.5s;
+      }
+      #deleteBtn:hover{
+        background-color: red;
+        color: white;
+      }
+      #topContent {
+        width: 100%;
+        height: 15%;
+        display: flex;
+        color: #4c9dfb;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1.5em;
+        background-color: #f6f6f6;
+      }
+      #logo {
+        flex: 2;
+      }
+      #logoImg {
+        background: url("images/logo.png");
+        width: 50px;
+        height: 50px;
+        margin-left: 25px;
+        background-size: cover;
+      }
+      #header {
+        flex: 10;
+      }
+      .topOne {
+            flex: 2;
+            cursor: pointer;
+          }
+          #login{
+              margin-right: 20px;
+          }
+      #botContent {
+        width: 100%;
+        height: 85%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      #inboxContainer {
+        width: 90%;
+        height: 85%;
+        display: block;
+        overflow-y: scroll;
+        margin-top: 30px;
+      }
+      .oneChat {
+        width: 100%;
+        height: 80px;
+        background-color: #f6f6f6;
+        margin-bottom: 10px;
+        font-family: "Poppins";
+        cursor: pointer;
+        display: flex;
+      }
+      .name {
+        flex: 1;
+        /* margin-top: 20px; */
+        margin-left: 15px;
+        color: #4c9dfb;
+        font-weight: bold;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+      }
+      .message {
+        flex: 1;
+        text-align: right;
+        /* margin-top: 20px; */
+        margin-right: 15px;
+        font-size: 0.8em;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
+      .unblockBtn{
+        color: red;
+        border: 1px solid red;
+        cursor: pointer;
+        font-family: "Poppins";
+        font-weight: bold;
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      #blockBtn:hover{
+          background-color: red;
+          color: white;
+      }
+      .message {
+        margin-right: 15px;
+        margin-left: 15px;
+        margin-top: 10px;
+        color: #707070;
+        font-size: 0.9em;
+      }
+    </style>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-auth.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-analytics.js";
+      import {
+        getDatabase,
+        ref,
+        onValue,
+        push,
+        update,
+        remove,
+      } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyBe2ikeK1R0fv9NPloMaLYE3-xc_raIW7o",
+        authDomain: "app-healthdata.firebaseapp.com",
+        databaseURL: "https://app-healthdata-default-rtdb.firebaseio.com",
+        projectId: "app-healthdata",
+        storageBucket: "app-healthdata.appspot.com",
+        messagingSenderId: "780488983474",
+        appId: "1:780488983474:web:0864b3f14ae9e695851aab",
+        measurementId: "G-FECQ1GHF4H",
+      };
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      var messages = [];
+      var multipleMsg = [];
+      var multipleDlt = [];
+      var db = getDatabase();
+      var blockedUsers = [];
+      var blockedUsersIDS = [];
+      $(document).ready(function () {
+        const blockedRef = ref(db, "doctors/" + localStorage.getItem("myID") + "/blocked");
+        onValue(blockedRef, (snapshot) => {
+            snapshot.forEach(function (child){
+                // console.log(child.child("id").val());
+                const userRef = ref(db, "users/" + child.child("id").val() + "/data");
+                blockedUsersIDS.push(child.child("id").val());
+                onValue(userRef, (snapshot) =>{
+                    // console.log(snapshot.child("name").val());
+                    blockedUsers.push(snapshot.child("name").val());
+                });
+            });
+        });
+        showBlocked();
+       
+      });
+      $(document).on("click", "#blockBtn", function () {
+        var user = this.parentElement.parentElement.getAttribute("sender");
+        const blockedRef = ref(db, "doctors/" + localStorage.getItem("myID") + "/blocked");
+        onValue(blockedRef, (snapshot) => {
+            snapshot.forEach(function (child){
+                console.log(child.child("id").val());
+                remove(ref(db, "doctors/" + localStorage.getItem("myID") + "/blocked/" + child.key));
+                alert("User unblocked!");
+                window.location = "inbox.html";
+            });
+        });
+      });
+      $("#chat").click(function(){
+            window.location = "inbox.html";
+        })
+        $("#post").click(function(){
+            window.location = "createPost.html";
+        })
+        $("#Login").click(function(){
+            window.location = "notifications.html";
+        })
+        $("#icon").click(function(){
+            window.location = "icon.html";
+        })
+        $("#blocked").click(function(){
+            window.location = "blocked.html";
+        })
+      function showBlocked(){
+        var div = document.querySelector(".oneChat");
+        setTimeout(
+        function() {
+        for(var i = 0; i<blockedUsers.length;i++){
+          var clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
+          clone.setAttribute("sender", blockedUsersIDS[i]);
+          clone.children[0].innerHTML = blockedUsers[i];
+          document.getElementById("inboxContainer").appendChild(clone);
+        }
+        document.getElementById("inboxContainer").firstElementChild.remove();
+        }, 2000);
+      }
+    </script>
+  </body>
+</html>
