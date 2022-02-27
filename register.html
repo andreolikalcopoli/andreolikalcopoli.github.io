@@ -164,6 +164,8 @@
       })
       function writeUserData(name, cpf, email, password) {
         const db = getDatabase();
+        cpf = cpf.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'');
+        console.log(cpf);
         var p = set(ref(db, "doctors/"+cpf), {
           name: name,
           cpf: cpf,

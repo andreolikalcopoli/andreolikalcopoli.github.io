@@ -160,6 +160,8 @@
       var pw = document.getElementById("password").value;
       // console.log(email+"@gmail.com");
       // console.log(pw);
+      email = email.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'');
+      console.log(email);
       var name = "";
       signInWithEmailAndPassword(auth, email + "@gmail.com", pw)
       .then((userCredential) => {
