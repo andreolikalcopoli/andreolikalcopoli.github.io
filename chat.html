@@ -377,10 +377,18 @@
       var dal = false;
       var id;
       var he;
+      var hisToken = "";
       $(document).ready(function () {
         id = window.location.href.split("?")[1];
         console.log(id);
         const db = getDatabase();
+        const tokenRef = ref(db, "infoChat/" + id);
+        onValue(tokenRef, (snapshot) => {
+          const tokenRefUser = ref(db, "users/" + snapshot.child("member0").val());
+          onValue(tokenRefUser, (snapshot) =>{
+            hisToken = snapshot.child("token").val();
+          });
+        });
         const starCountRef = ref(db, "chat/" + id + "/messages");
         var dal = false;
         onValue(starCountRef, (snapshot) => {
@@ -431,6 +439,7 @@
       function writeMessage(text, time, sender, senderName) {
         var db = getDatabase();
         push(ref(db, "chat/" + id + "/messages"), {
+          replyText: "",
           sender: sender,
           senderName: senderName,
           text: text,
@@ -440,12 +449,27 @@
           text: text,
           time: time,
         })
-        // set(ref(db, "chat/" + id + "/lastMessage"), {
-        //   sender: sender,te
-        //   senderName: "Me",
-        //   text: text,
-        //   time: time,
-        // });
+        var title = localStorage.getItem("name") + " has sent you a message"
+        let body = {
+            to: hisToken,
+            notification:{
+                title: title,
+                body: text,
+            }
+            }
+        let options={
+            method: "POST",
+            headers: new Headers({
+                Authorization: "key=AAAAtbjEw7I:APA91bE9kRWHE_l0XtJcDDtcoovMHOa9LD51pau6KUTUU59ArVTJYMggfsNPcJbv1CkCEgjqh7D2lHwP_Q-brJ3Gv_EC7YcVflQo4fZ41mnr8i8VlBcCmrTqMkXrJtywDU7fMu-rZJsd",
+                "Content-Type":"application/json"
+            }),
+            body: JSON.stringify(body)
+        }
+        fetch("https://fcm.googleapis.com/fcm/send", options).then(res=>{
+            console.log(res);
+            console.log("SENT");
+        }).catch(e=> console.log(e));
+
         document.getElementById("writeMessage").value = "";
         document.getElementById("midBot").scrollTop =
           document.getElementById("midBot").scrollHeight;
