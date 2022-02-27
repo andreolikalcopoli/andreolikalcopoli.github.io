@@ -51,9 +51,12 @@
           <div id="midBot">
             <div id="myMsg"><p class="poruka" id="myMsgP"></p></div>
             <div id="notMyMsg"><p class="poruka" id="notMyMsgP"></p></div>
+            <img class="imageMsg" id="myImageMsg">
+            <img class="imageMsg" id="notMyImageMsg">
           </div>
           <div id="botBot">
             <input id="writeMessage" placeholder="Write a message..." />
+            <input id="fileInput" type="file">
           </div>
         </div>
       </div>
@@ -147,7 +150,7 @@
         flex: 1;
       }
       #logoImg {
-        background: url("images/logo.png");
+        background: url(https://firebasestorage.googleapis.com/v0/b/app-healthdata.appspot.com/o/chat%2FpTUoCvJtLufZqFRRkmnkiJeVHgn1%2Fimages%2F-MwugugFrbFXar6tYnXL%2Fimage.jpg?alt=media&token=3aefd340-7478-4e35-b966-4dd82ee69f1d);
         width: 50px;
         height: 50px;
         margin-left: 25px;
@@ -256,6 +259,23 @@
         font-size: 0.9em;
         border-radius: 5px;
       }
+      #myImageMsg{
+        display: flex;
+        margin-left: 90%;
+        background: url("images/logo.png");
+        border-radius: 5px;
+        width: 100px;
+        height: 100px;
+        display: none;
+      }
+      #notMyImageMsg{
+        display: flex;
+        background: url("images/logo.png");
+        border-radius: 5px;
+        width: 100px;
+        height: 100px;
+        display: none;
+      }
       #pinMyMsg{
         min-height: 5%;
         display: flex;
@@ -339,6 +359,7 @@
 
     <script type="module" >
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js";
+      import { getStorage, ref as ref_storage, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-storage.js";
       import {
         getAuth,
         onAuthStateChanged,
@@ -346,7 +367,7 @@
       import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-analytics.js";
       import {
         getDatabase,
-        ref,
+        ref as ref_database,
         onValue,
         set,
         push,
@@ -370,6 +391,7 @@
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const db = getDatabase();
+      const storage = getStorage();
       var sender;
       var senderName;
       var messages = [];
@@ -382,14 +404,14 @@
         id = window.location.href.split("?")[1];
         console.log(id);
         const db = getDatabase();
-        const tokenRef = ref(db, "infoChat/" + id);
+        const tokenRef = ref_database(db, "infoChat/" + id);
         onValue(tokenRef, (snapshot) => {
-          const tokenRefUser = ref(db, "users/" + snapshot.child("member0").val());
+          const tokenRefUser = ref_database(db, "users/" + snapshot.child("member0").val());
           onValue(tokenRefUser, (snapshot) =>{
             hisToken = snapshot.child("token").val();
           });
         });
-        const starCountRef = ref(db, "chat/" + id + "/messages");
+        const starCountRef = ref_database(db, "chat/" + id + "/messages");
         var dal = false;
         onValue(starCountRef, (snapshot) => {
           messages = [];
@@ -413,9 +435,10 @@
             //   senderName = child.child("senderName").val();
             // }
           });
-
+          console.log("TU");
           if (dal) {
-            console.log(messages);
+            console.log("USO SAM");
+              console.log(messages[messages.length - 1].text);
             if (messages[messages.length - 1].senderName == localStorage.getItem("name")) {
               var div = document.getElementById("myMsg"),
                 clone = div.cloneNode(true);
@@ -424,10 +447,10 @@
             } else {
               var div = document.getElementById("notMyMsg"),
                 clone = div.cloneNode(true);
+                console.log(messages[messages.length - 1]);
               clone.children[0].innerHTML = messages[messages.length - 1].text;
               clone.children[0].setAttribute("time", messages[messages.length - 1].time);
             }
-            console.log(clone.children[0]);
             clone.children[0].setAttribute("time", "AAAA");
             document.getElementById("midBot").appendChild(clone);
           }
@@ -438,14 +461,14 @@
       });
       function writeMessage(text, time, sender, senderName) {
         var db = getDatabase();
-        push(ref(db, "chat/" + id + "/messages"), {
+        push(ref_database(db, "chat/" + id + "/messages"), {
           replyText: "",
           sender: sender,
           senderName: senderName,
           text: text,
           time: time,
         });
-        update(ref(db, "infoChat/"+ id),{
+        update(ref_database(db, "infoChat/"+ id),{
           text: text,
           time: time,
         })
@@ -509,7 +532,7 @@
       });
       $(document).on("click", "#blockYes", function(){
         var db = getDatabase();
-        push(ref(db, "doctors/" + localStorage.getItem("myID") + "/blocked"), {
+        push(ref_database(db, "doctors/" + localStorage.getItem("myID") + "/blocked"), {
           id: he,
         });
         alert("User blocked!");
@@ -529,20 +552,20 @@
       });
       $(document).on("click", ".poruka", function(){
         if(pinBool){
-          var p = push(ref(db, "chat/" + id + "/pinnedMessages/" + id), {
+          var p = push(ref_database(db, "chat/" + id + "/pinnedMessages/" + id), {
             chatID: id,
             username: localStorage.getItem("name"),
           });
           var sender = this.getAttribute("id");
           if(sender == "myMsgP"){
-            set(ref(db, "chat/" + id + "/pinnedMessages/" + id + "/" + p.key + "/chatMessage"),{
+            set(ref_database(db, "chat/" + id + "/pinnedMessages/" + id + "/" + p.key + "/chatMessage"),{
               sender: localStorage.getItem("myID"),
               senderName: localStorage.getItem("name"),
               text: this.innerHTML,
               time: this.getAttribute("time")
             })
           }else{
-            set(ref(db, "chat/" + id + "/pinnedMessages/" + id + "/" + p.key + "/chatMessage"),{
+            set(ref_database(db, "chat/" + id + "/pinnedMessages/" + id + "/" + p.key + "/chatMessage"),{
               sender: localStorage.getItem("myID"),
               senderName: document.getElementById("name").innerHTML,
               text: this.innerHTML,
@@ -569,7 +592,47 @@
           messages[min] = temp;
         }
         messages.reverse();
+        var counter = 0;
         for (var i = 0; i < messages.length; i++) {
+          if(messages[i].text.startsWith("/chat/")){
+              const starsRef = ref_storage(storage, messages[i].text);
+              if(messages[i].sender == localStorage.getItem("myID")){
+                var div = document.getElementById("myImageMsg"),
+                clone = div.cloneNode(true);
+              }else{
+                var div = document.getElementById("notMyImageMsg"),
+                clone = div.cloneNode(true);
+              }
+              
+                clone.style.display = "unset";
+                document.getElementById("midBot").appendChild(clone);
+              if(messages[i].sender == localStorage.getItem("myID")){
+                getDownloadURL(starsRef)
+              .then((url) => {
+                const collection = document.getElementsByClassName("imageMsg");
+                console.log(collection);
+                console.log("USO");
+                collection[counter + 2].setAttribute('src', url);
+                counter++;
+                
+              })
+              .catch((error) => {
+              });
+
+              }else{
+                getDownloadURL(starsRef)
+              .then((url) => {
+                const collection = document.getElementsByClassName("imageMsg");
+                console.log(collection);
+                console.log("USO");
+                collection[counter + 2].setAttribute('src', url);
+                counter++;
+              })
+              .catch((error) => {
+              });
+              }
+              
+            }else{
           if (messages[i].sender == localStorage.getItem("myID")) {
             var div = document.getElementById("myMsg"),
               clone = div.cloneNode(true);
@@ -579,7 +642,9 @@
               clone = div.cloneNode(true);
             clone.children[0].innerHTML = messages[i].text;
           }
+            
           document.getElementById("midBot").appendChild(clone);
+            }
         }
         document.getElementById("midBot").firstElementChild.remove();
         document.getElementById("midBot").firstElementChild.remove();
@@ -596,7 +661,7 @@
         // for(var i = 0; i < document.getElementById("pinContainer").childElementCount; i++){
         //   document.getElementById("pinnedContainer").firstElementChild.remove();
         // }
-        const starCountRef = ref(db, "chat/" + id + "/pinnedMessages");
+        const starCountRef = ref_database(db, "chat/" + id + "/pinnedMessages");
         onValue(starCountRef, (snapshot) => {
           console.log(snapshot.val());
           snapshot.forEach(function (child) {
