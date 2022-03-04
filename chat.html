@@ -250,7 +250,7 @@
       }
       #myMsg {
         min-height: 5%;
-        display: flex;
+        display: none;
         justify-content: flex-end;
         /* padding: 5px; */
         font-family: "Poppins";
@@ -301,7 +301,7 @@
       }
       #notMyMsg {
         min-height: 5%;
-        display: flex;
+        display: none;
         /* padding: 5px; */
         font-family: "Poppins";
         color: #4c9dfb;
@@ -355,6 +355,9 @@
         font-family: "Poppins";
         font-weight: bold;
       }
+      .addFlex{
+        display: flex !important;
+      }
     </style>
 
     <script type="module" >
@@ -399,6 +402,7 @@
       var dal = false;
       var id;
       var he;
+      var hisName;
       var hisToken = "";
       $(document).ready(function () {
         id = window.location.href.split("?")[1];
@@ -411,9 +415,20 @@
             hisToken = snapshot.child("token").val();
           });
         });
+        const refHe = ref_database(db, "infoChat/"+id);
+        onValue(refHe, (snapshot) => {
+          he = snapshot.child("member0").val();
+          const refHisName = ref_database(db, "users/"+he+"/data");
+        onValue(refHisName, (snapshot) => {
+          document.getElementById("name").innerHTML = snapshot.child("name").val();
+        });
+          
+        });
+        
         const starCountRef = ref_database(db, "chat/" + id + "/messages");
         var dal = false;
         onValue(starCountRef, (snapshot) => {
+          // console.log("UPAO SAM OVDE")
           messages = [];
           const data = snapshot.val();
           snapshot.forEach(function (child) {
@@ -424,10 +439,7 @@
               child.child("text").val(),
               child.child("time").val()
             );
-            if (msg.senderName != localStorage.getItem("name")) {
-              document.getElementById("name").innerHTML = msg.senderName;
-              he = msg.sender;
-            }
+            
             messages.push(msg);
             // console.log(messages);
             // } else {
@@ -452,6 +464,7 @@
               clone.children[0].setAttribute("time", messages[messages.length - 1].time);
             }
             clone.children[0].setAttribute("time", "AAAA");
+            clone.classList.add("addFlex");
             document.getElementById("midBot").appendChild(clone);
           }
           dal = true;
@@ -469,8 +482,8 @@
           time: time,
         });
         update(ref_database(db, "infoChat/"+ id),{
-          text: text,
-          time: time,
+          lastMessageText: text,
+          lastMsgTime: time,
         })
         var title = localStorage.getItem("name") + " has sent you a message"
         let body = {
@@ -532,6 +545,7 @@
       });
       $(document).on("click", "#blockYes", function(){
         var db = getDatabase();
+        console.log(he);
         push(ref_database(db, "doctors/" + localStorage.getItem("myID") + "/blocked"), {
           id: he,
         });
@@ -642,12 +656,12 @@
               clone = div.cloneNode(true);
             clone.children[0].innerHTML = messages[i].text;
           }
-            
+          clone.classList.add("addFlex");
           document.getElementById("midBot").appendChild(clone);
             }
         }
-        document.getElementById("midBot").firstElementChild.remove();
-        document.getElementById("midBot").firstElementChild.remove();
+        // document.getElementById("midBot").firstElementChild.remove();
+        // document.getElementById("midBot").firstElementChild.remove();
         document.getElementById("midBot").scrollTop =
           document.getElementById("midBot").scrollHeight;
         // console.log(messages);
@@ -704,6 +718,7 @@
               }
               console.log("PIN JE");
               console.log(whoSent[i]);
+              clone.classList.add("addFlex");
               document.getElementById("pinnedContainer").appendChild(clone);
             }
             document.getElementById("pinnedContainer").firstElementChild.remove();
