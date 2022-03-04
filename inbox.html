@@ -254,6 +254,7 @@
       var messages = [];
       var multipleMsg = [];
       var multipleDlt = [];
+      var myUsersID = [];
       var db = getDatabase();
       $(document).ready(function () {
         function writeMessageToMultipleUsers(text, time, sender, senderName) {
@@ -387,18 +388,25 @@
             });
           });
         });
+        setTimeout(
+    function() {
         onValue(imBlockedRef, (snapshot) => {
           snapshot.forEach(function (child){
             child.forEach(function (part){
               part.forEach(function (partic){
                 if(partic.key == "name"){
-                  // console.log(child.key);
-                  var name = partic.val();
-                  var div = document.querySelector(".oneUser"),
-                  clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
-                  clone.setAttribute("userID", child.key);
-                  clone.children[0].innerHTML = name;
-                  document.getElementById("allUsersContainer").appendChild(clone);
+                  console.log(myUsersID);
+                  if (myUsersID.indexOf(child.key) > -1) {
+                      console.log("POSTOJI");
+                  } else {
+                    var name = partic.val();
+                    var div = document.querySelector(".oneUser"),
+                    clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
+                    clone.setAttribute("userID", child.key);
+                    clone.children[0].innerHTML = name;
+                    document.getElementById("allUsersContainer").appendChild(clone);
+                  }
+                  
                 }
               });
             });
@@ -406,6 +414,8 @@
 
         document.getElementById("allUsersContainer").firstElementChild.remove();
         });
+    },1000);
+
         const blockedRef = ref(db, "doctors/" + localStorage.getItem("myID") + "/blocked");
         onValue(blockedRef, (snapshot) => {
           snapshot.forEach(function (child) {
@@ -440,6 +450,7 @@
                 // console.log(snapshot.key);
                 if(child.key == "member0"){
                   o = child.val();
+                  myUsersID.push(o);
                 }
                 if(child.key == "member1"){
                   p = child.val();
@@ -531,6 +542,9 @@
           //set min to the current iteration of i
           var min = i;
           for (var j = i + 1; j < messages.length; j++) {
+            // console.log(messages[i].time);
+            // console.log(messages[j].time);
+            // console.log(!newDate(messages[i].time, messages[j].time));
             if (!newDate(messages[i].time, messages[j].time)) {
               min = j;
             }
@@ -539,6 +553,7 @@
           messages[i] = messages[min];
           messages[min] = temp;
         }
+        console.log(messages);
         // console.log(messages);
         for (var i = 0; i < messages.length; i++) {
           var name = "";
@@ -592,8 +607,14 @@
                 return false;
               } else {
                 if (first22[1] > second22[1]) {
+                  console.log(first22[1]);
+                  console.log(second22[1]);
+                  console.log("PRVI JE VECI");
                   return true;
                 } else if (first22[1] < second22[1]) {
+                  console.log(first22[1]);
+                  console.log(second22[1]);
+                  console.log("DRUGI JE VECI");
                   return false;
                 } else {
                   return true;
