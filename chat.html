@@ -11,6 +11,8 @@
     <title>Chat</title>
   </head>
   <body>
+    <!-- <a download="https://static.nationalgeographic.rs/Picture/31394/jpeg/mesec_snimljen_1_540822360" target="_blank">aaa</a> -->
+    <!-- <iframe id="my_iframe" style="display:none;"></iframe> -->
     <div id="pinnedPopup">
       <p id="pinnedMsgText">Pinned messages</p>
       <div id="closePinned">X</div>
@@ -41,6 +43,9 @@
         <div id="botContainer">
           <div id="topBot">
             <div id="name"></div>
+            <div id="searchView">
+              <input placeholder="Search message" id="searchInput"></input>
+            </div>
             <div id="blockBtnView">
               <div id="blockBtn">BLOCK</div>
             </div>
@@ -57,11 +62,15 @@
           <div id="botBot">
             <input id="writeMessage" placeholder="Write a message..." />
             <input id="fileInput" type="file">
+            <div id="postBtn">POST</div>
           </div>
         </div>
       </div>
     </div>
     <style>
+      #postBtn{
+        cursor: pointer;
+      }
       body {
         margin: 0;
         font-family: "Poppins";
@@ -259,10 +268,14 @@
         font-size: 0.9em;
         border-radius: 5px;
       }
+      .imageMsg{
+        cursor: pointer;
+        /* display: block !important; */
+      }
       #myImageMsg{
         display: flex;
         margin-left: 90%;
-        background: url("images/logo.png");
+        /* background: url("images/logo.png"); */
         border-radius: 5px;
         width: 100px;
         height: 100px;
@@ -270,7 +283,7 @@
       }
       #notMyImageMsg{
         display: flex;
-        background: url("images/logo.png");
+        /* background: url("images/logo.png"); */
         border-radius: 5px;
         width: 100px;
         height: 100px;
@@ -334,7 +347,25 @@
       p {
         margin: 10px;
       }
-
+      #searchView{
+        flex: 3;
+        display: flex;
+        /* justify-content: start; */
+        align-items: center;
+        justify-content: flex-end;
+      }
+      #searchInput{
+        width: 80%;
+        margin-right: 20px;
+        height: 75%;
+        border-radius: 5px;
+        border: none;
+        background-color: #f6f6f6;
+        padding: 10px;
+        font-family: "Poppins";
+        outline: none;
+        color: #4c9dfb;
+      }
       #botBot {
         flex: 1;
         display: flex;
@@ -358,11 +389,12 @@
       .addFlex{
         display: flex !important;
       }
+      
     </style>
 
     <script type="module" >
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js";
-      import { getStorage, ref as ref_storage, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-storage.js";
+      import { getStorage, ref as ref_storage, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/9.4.0/firebase-storage.js";
       import {
         getAuth,
         onAuthStateChanged,
@@ -404,8 +436,15 @@
       var he;
       var hisName;
       var hisToken = "";
+      var updatedValue = false;
+      function Download(url) {
+    document.getElementById('my_iframe').src = url;
+};
       $(document).ready(function () {
         id = window.location.href.split("?")[1];
+        if(id == localStorage.getItem("myID")){
+          console.log("TO SAM JA");
+        }
         console.log(id);
         const db = getDatabase();
         const tokenRef = ref_database(db, "infoChat/" + id);
@@ -427,6 +466,7 @@
         
         const starCountRef = ref_database(db, "chat/" + id + "/messages");
         var dal = false;
+        var brojac = 0;
         onValue(starCountRef, (snapshot) => {
           // console.log("UPAO SAM OVDE")
           messages = [];
@@ -439,7 +479,7 @@
               child.child("text").val(),
               child.child("time").val()
             );
-            
+            console.log(msg);
             messages.push(msg);
             // console.log(messages);
             // } else {
@@ -447,10 +487,46 @@
             //   senderName = child.child("senderName").val();
             // }
           });
-          console.log("TU");
+          // console.log("TU");
+          var ifAdd = false;
           if (dal) {
-            console.log("USO SAM");
-              console.log(messages[messages.length - 1].text);
+              if(messages[messages.length - 1].text.startsWith("/chat/")){
+
+              if(messages[messages.length - 1].sender == localStorage.getItem("myID")){
+                var div = document.getElementById("myImageMsg"),
+                clone = div.cloneNode(true);
+              }else{
+                var div = document.getElementById("notMyImageMsg"),
+                clone = div.cloneNode(true);
+              }
+                // clone.setAttribute("src", "images/"+fajlIme);
+                clone.style.display = "block";
+                if(brojac%2!=0){
+                  document.getElementById("midBot").appendChild(clone);
+                }
+                  brojac++;
+              var tekstRef = messages[messages.length-1].text;
+              setTimeout(
+              function() {
+                console.log(clone);
+                const starsRef = ref_storage(storage, tekstRef);
+                getDownloadURL(starsRef)
+              .then((url) => {
+                if(url.includes(".png") || url.includes(".jpg") || url.includes(".jpeg") || url.includes(".svg")){
+                clone.setAttribute('src', url);
+                clone.setAttribute('link', "a");
+                }else{
+                  clone.setAttribute('link', url);
+                  clone.setAttribute('src', "images/file.svg");
+                }
+                counter++;
+              })
+              
+              .catch((error) => {
+              });
+              },2000);
+              // brojac = 0;
+            }else{
             if (messages[messages.length - 1].senderName == localStorage.getItem("name")) {
               var div = document.getElementById("myMsg"),
                 clone = div.cloneNode(true);
@@ -459,7 +535,7 @@
             } else {
               var div = document.getElementById("notMyMsg"),
                 clone = div.cloneNode(true);
-                console.log(messages[messages.length - 1]);
+                // console.log(messages[messages.length - 1]);
               clone.children[0].innerHTML = messages[messages.length - 1].text;
               clone.children[0].setAttribute("time", messages[messages.length - 1].time);
             }
@@ -467,24 +543,60 @@
             clone.classList.add("addFlex");
             document.getElementById("midBot").appendChild(clone);
           }
+          }
           dal = true;
+          
           // numberOfMessages = messages.length;
         });
-        setTimeout(sortMessages, 2000);
+          setTimeout(sortMessages, 2000);
       });
       function writeMessage(text, time, sender, senderName) {
+        console.log("POZVAO SAM SE I TEKST JE ");
+        console.log(text);
         var db = getDatabase();
-        push(ref_database(db, "chat/" + id + "/messages"), {
+        if(id != localStorage.getItem("myID")){
+          if(ifPost){
+        var p = push(ref_database(db, "chat/" + id + "/messages"), {
+          replyText: "",
+          sender: sender,
+          senderName: senderName,
+          text: text+"/"+fajlIme,
+          time: time,
+        });
+        update(ref_database(db, "chat/" + id + "/messages/"+p.key), {
+          replyText: "",
+          sender: sender,
+          senderName: senderName,
+          text: text+p.key+"/"+fajlIme,
+          time: time,
+        });
+        
+        }else{
+          var p = push(ref_database(db, "chat/" + id + "/messages"), {
           replyText: "",
           sender: sender,
           senderName: senderName,
           text: text,
           time: time,
         });
+        }
         update(ref_database(db, "infoChat/"+ id),{
           lastMessageText: text,
           lastMsgTime: time,
         })
+        if(ifPost){
+          var storageRef;
+          if(ifImage){
+            storageRef = ref_storage(storage, 'chat/'+id+"/images/"+p.key+"/"+fajlIme);
+          }else{
+            storageRef = ref_storage(storage, 'chat/'+id+"/attachments/"+p.key+"/"+fajlIme);
+          }
+          uploadBytes(storageRef, fajl).then((snapshot) => {
+                console.log('Uploaded a blob or file!');
+                // alert("Icon changed!");
+                });
+        }
+        ifPost = false;
         var title = localStorage.getItem("name") + " has sent you a message"
         let body = {
             to: hisToken,
@@ -505,11 +617,82 @@
             console.log(res);
             console.log("SENT");
         }).catch(e=> console.log(e));
-
+      }else{
+        // console.log("AAAAAAAA");
+      }
         document.getElementById("writeMessage").value = "";
         document.getElementById("midBot").scrollTop =
           document.getElementById("midBot").scrollHeight;
       }
+      var fajl;
+      var fajlIme;
+      var ifImage = false;
+      function getExtension(filename) {
+  var parts = filename.split('.');
+  return parts[parts.length - 1];
+}
+      document
+          .querySelector('input[type="file"]')
+          .addEventListener("change", function () {
+            ifImage = false;
+            if (this.files && this.files[0]) {
+              // var img = document.querySelector("img");
+              // img.onload = () => {
+                // image = this.files[0];
+                fajl = this.files[0];
+                fajlIme = fajl.name;
+                if(getExtension(fajl.name) == "png" || getExtension(fajl.name) == "svg" || getExtension(fajl.name) == "jpg" || getExtension(fajl.name) == "jpeg"){
+                  ifImage = true;
+                }
+              // };
+              // img.src = URL.createObjectURL(this.files[0]); // set src to blob url
+              
+            }
+          });
+          var ifPost = false;
+          $("#postBtn").click(function () {
+            ifPost = true;
+            var d = new Date();
+            var day = d.getDate();
+            var month = d.getMonth() + 1;
+            var year = d.getFullYear();
+            var hour = d.getHours();
+            var min = d.getMinutes();
+            var seconds = d.getSeconds();
+            var final = day + "/" + month + "/" + year + " " + hour + ":" + min + ":" + seconds;
+            var storageRef;
+            if(ifImage){
+              console.log(ifImage);
+              console.log("OVO JE IF IMAGE");
+              writeMessage("/chat/"+id+"/images/",final,localStorage.getItem('myID'),localStorage.getItem('name'));
+              // storageRef = ref_storage(storage, 'chat/'+id+"/images/"+"aaa");
+            }else{
+              writeMessage("/chat/"+id+"/attachments/",final,localStorage.getItem('myID'),localStorage.getItem('name'));
+             
+            }
+            
+              
+        })
+
+      var input = document.getElementById("searchInput");
+      input.addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          var search = document.getElementById("searchInput").value;
+          var countDiv = document.getElementById("midBot");
+          for(var i = 0; i < countDiv.childElementCount - 4;i++){
+            // console.log(countDiv.children[i+4].children[0].innerHTML);
+            if(countDiv.children[i+4].children[0].innerHTML == search){
+              // console.log(search);
+              var myDiv = document.getElementById("midBot");
+              var topPos = countDiv.children[i+4].offsetTop;
+              // console.log(topPos);
+              var off = countDiv.children[4].offsetTop;
+              myDiv.scrollTop = topPos - off;
+            }
+          }
+        }
+      });
       var input = document.getElementById("writeMessage");
       input.addEventListener("keyup", function (event) {
         if (event.keyCode === 13) {
@@ -521,9 +704,10 @@
             var year = d.getFullYear();
             var hour = d.getHours();
             var min = d.getMinutes();
-            var final = day + "/" + month + "/" + year + " " + hour + ":" + min;
-            console.log(localStorage.getItem('myID')); 
-            console.log(localStorage.getItem('name')); 
+            var seconds = d.getSeconds();
+            var final = day + "/" + month + "/" + year + " " + hour + ":" + min + ":" + seconds;
+            // console.log(localStorage.getItem('myID')); 
+            // console.log(localStorage.getItem('name')); 
             writeMessage(input.value, final, localStorage.getItem('myID'), localStorage.getItem('name'));
           }
         }
@@ -545,7 +729,7 @@
       });
       $(document).on("click", "#blockYes", function(){
         var db = getDatabase();
-        console.log(he);
+        // console.log(he);
         push(ref_database(db, "doctors/" + localStorage.getItem("myID") + "/blocked"), {
           id: he,
         });
@@ -593,22 +777,25 @@
       });
 
       function sortMessages() {
-        for (var i = 0; i < messages.length; i++) {
-          //set min to the current iteration of i
-          var min = i;
-          for (var j = i + 1; j < messages.length; j++) {
-            if (!newDate(messages[i].time, messages[j].time)) {
-              min = j;
-            }
-          }
-          var temp = messages[i];
-          messages[i] = messages[min];
-          messages[min] = temp;
-        }
-        messages.reverse();
+        // console.log("USO SAM DA SORTIRAM");
+        // for (var i = 0; i < messages.length; i++) {
+        //   //set min to the current iteration of i
+        //   var min = i;
+        //   for (var j = i + 1; j < messages.length; j++) {
+        //     if (!newDate(messages[i].time, messages[j].time)) {
+        //       min = j;
+        //     }
+        //   }
+        //   var temp = messages[i];
+        //   messages[i] = messages[min];
+        //   messages[min] = temp;
+        // }
+        // messages.reverse();
+        // console.log(messages);
         var counter = 0;
         for (var i = 0; i < messages.length; i++) {
           if(messages[i].text.startsWith("/chat/")){
+            console.log(messages[i].text);
               const starsRef = ref_storage(storage, messages[i].text);
               if(messages[i].sender == localStorage.getItem("myID")){
                 var div = document.getElementById("myImageMsg"),
@@ -618,15 +805,21 @@
                 clone = div.cloneNode(true);
               }
               
-                clone.style.display = "unset";
+                clone.style.display = "block";
                 document.getElementById("midBot").appendChild(clone);
               if(messages[i].sender == localStorage.getItem("myID")){
                 getDownloadURL(starsRef)
               .then((url) => {
                 const collection = document.getElementsByClassName("imageMsg");
-                console.log(collection);
-                console.log("USO");
+                // console.log(collection);
+                // console.log("USO");
+                if(url.includes(".png") || url.includes(".jpg") || url.includes(".jpeg") || url.includes(".svg")){
                 collection[counter + 2].setAttribute('src', url);
+                collection[counter + 2].setAttribute('link', "a");
+                }else{
+                  collection[counter + 2].setAttribute('link', url);
+                  collection[counter + 2].setAttribute('src', "images/file.svg");
+                }
                 counter++;
                 
               })
@@ -637,9 +830,15 @@
                 getDownloadURL(starsRef)
               .then((url) => {
                 const collection = document.getElementsByClassName("imageMsg");
-                console.log(collection);
-                console.log("USO");
+                // console.log(collection);
+                // console.log("USO");
+                if(url.includes(".png") || url.includes(".jpg") || url.includes(".jpeg") || url.includes(".svg")){
                 collection[counter + 2].setAttribute('src', url);
+                collection[counter + 2].setAttribute('link', "a");
+                }else{
+                  collection[counter + 2].setAttribute('download', url);
+                  collection[counter + 2].setAttribute('src', "images/file.svg");
+                }
                 counter++;
               })
               .catch((error) => {
@@ -647,6 +846,7 @@
               }
               
             }else{
+              console.log(messages[i].text);
           if (messages[i].sender == localStorage.getItem("myID")) {
             var div = document.getElementById("myMsg"),
               clone = div.cloneNode(true);
@@ -666,6 +866,22 @@
           document.getElementById("midBot").scrollHeight;
         // console.log(messages);
       }
+      
+      function downloadURI(uri, name) {
+    let link = document.createElement("a");
+    link.download = name;
+    link.href = uri;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+      $(document).on("click", ".imageMsg", function(){
+        downloadURI(this.getAttribute('download'), "aa");
+        // browser.downloads.download({url: "https://example.org/image.png"})
+        // download(this.getAttribute("download"),"aaa");
+        // window.location = this.getAttribute("download");
+      });   
       var texts = [];
       var whoSent = [];
       function pinnedPressed(){
@@ -702,22 +918,22 @@
       function showMessagesPin() {
         setTimeout(
           function() {
-            console.log(texts);
-            console.log(whoSent);
+            // console.log(texts);
+            // console.log(whoSent);
             for(var i = 0; i < texts.length; i++){
               if(whoSent[i] == localStorage.getItem("name")){
                 var div = document.getElementById("pinMyMsg"),
                 clone = div.cloneNode(true);
-                console.log(clone);
+                // console.log(clone);
                 clone.children[0].innerHTML = texts[i];
               }else{
                 var div = document.getElementById("pinNotMyMsg"),
                 clone = div.cloneNode(true);
-                console.log(clone);
+                // console.log(clone);
                 clone.children[0].innerHTML = texts[i];
               }
-              console.log("PIN JE");
-              console.log(whoSent[i]);
+              // console.log("PIN JE");
+              // console.log(whoSent[i]);
               clone.classList.add("addFlex");
               document.getElementById("pinnedContainer").appendChild(clone);
             }
@@ -758,7 +974,11 @@
                 } else if (first22[1] < second22[1]) {
                   return false;
                 } else {
-                  return true;
+                  if(first22[2]>second22[2]){
+                    return true;
+                  }else{
+                    return false;
+                  }
                 }
               }
             }

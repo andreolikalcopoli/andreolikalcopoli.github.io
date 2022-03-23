@@ -31,6 +31,13 @@
           </div>
         </div>
         <div id="inboxContainer">
+          <div id="myselfChat">
+            <div class="topChat">
+              <div class="name"></div>
+              <div class="time"></div>
+            </div>
+            <div class="message"></div>
+          </div>
           <div class="oneChat">
             <div class="topChat">
               <div class="name"></div>
@@ -59,6 +66,14 @@
         margin: 10px;
         width: 90%;
         height: 50px;
+      }
+      #myselfChat{
+        background-color: lightgrey;
+        width: 100%;
+        height: 100px;
+        margin-bottom: 10px;
+        font-family: "Poppins";
+        cursor: pointer;
       }
       #writeMessage {
         flex: 6;
@@ -187,6 +202,10 @@
         margin-bottom: 10px;
         font-family: "Poppins";
         cursor: pointer;
+        display: none;
+      }
+      .addBlock{
+        display: block;
       }
       .topChat {
         display: flex;
@@ -255,8 +274,10 @@
       var multipleMsg = [];
       var multipleDlt = [];
       var myUsersID = [];
+      var usernamesall = [];
       var db = getDatabase();
       $(document).ready(function () {
+        document.getElementById("myselfChat").children[0].children[0].innerHTML = localStorage.getItem("name");
         function writeMessageToMultipleUsers(text, time, sender, senderName) {
           
         for(var i = 0; i < multipleMsg.length; i++){
@@ -287,7 +308,8 @@
             var year = d.getFullYear();
             var hour = d.getHours();
             var min = d.getMinutes();
-            var final = day + "/" + month + "/" + year + " " + hour + ":" + min;
+            var seconds = d.getSeconds();
+            var final = day + "/" + month + "/" + year + " " + hour + ":" + min + ":" + seconds;
               writeMessageToMultipleUsers(input.value, final, localStorage.getItem("myID"), localStorage.getItem("name"));
               // console.log(document.querySelectorAll('.oneChat').length);
               for(var i = 0; i < document.querySelectorAll('.oneChat').length; i++){
@@ -323,19 +345,33 @@
 
         });
         $(document).on("click", ".oneUser", function () {
-          var p = push(ref(db, "infoChat"), {
+
+          var d = new Date();
+            var day = d.getDate();
+            var month = d.getMonth() + 1;
+            var year = d.getFullYear();
+            var hour = d.getHours();
+            var min = d.getMinutes();
+            var seconds = d.getSeconds();
+            var final = day + "/" + month + "/" + year + " " + hour + ":" + min + ":" + seconds;
+
+          var p = set(ref(db, "infoChat/"+this.getAttribute("userid")), {
             lastMessage: localStorage.getItem("myID"),
             lastMessageText: "",
-            lastMsgTime: "10/03/2022 13:13",
+            lastMsgTime: final,
             member0: this.getAttribute("userID"),
             member1: localStorage.getItem("myID")
           });
-          var o = p.key
-          var k = "adasdas"
+          // var o = p.key
+          var o = this.getAttribute("userid");
+          console.log(this.getAttribute("userid"));
           push(ref(db, "userChats/"+localStorage.getItem("myID")),{
-            k: p.key
+            k: o
           });
-          window.location = "chat.html?" + p.key;
+          window.location = "chat.html?" + this.getAttribute("userid");
+        });
+        $(document).on("click", "#myselfChat",function(){
+          window.location = "chat.html?" + localStorage.getItem("myID");
         });
         $(document).on("click", ".oneChat", function () {
           if(document.getElementById("writeMessage").value == "" && !deleteBool){
@@ -375,6 +411,7 @@
           }
         });
         // console.log("TU SAM");
+        
         var blockedUsers = [];
         var imBlocked = [];
         const db = getDatabase();
@@ -395,14 +432,14 @@
             child.forEach(function (part){
               part.forEach(function (partic){
                 if(partic.key == "name"){
-                  console.log(myUsersID);
+                  // console.log(myUsersID);
                   if (myUsersID.indexOf(child.key) > -1) {
-                      console.log("POSTOJI");
+                      // console.log("POSTOJI");
                   } else {
                     var name = partic.val();
                     var div = document.querySelector(".oneUser"),
                     clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
-                    clone.setAttribute("userID", child.key);
+                    clone.setAttribute("userid", child.key);
                     clone.children[0].innerHTML = name;
                     document.getElementById("allUsersContainer").appendChild(clone);
                   }
@@ -412,7 +449,7 @@
             });
           });
 
-        document.getElementById("allUsersContainer").firstElementChild.remove();
+        document.getElementById("allUsersContainer").children[0].remove();
         });
     },1000);
 
@@ -424,6 +461,7 @@
             });
           });
         });
+        
         const starCountRef = ref(db, "userChats/"+localStorage.getItem("myID"));
         // console.log(localStorage.getItem("myID"));
         onValue(starCountRef, (snapshot) => {
@@ -434,7 +472,7 @@
           // console.log(data);
           snapshot.forEach(function (child) {
             child.forEach(function(part){
-              console.log(part.val());
+              // console.log(part.val());
             
             var msg;
             var p = "Me";
@@ -447,10 +485,17 @@
               var text = "";
               var time = "";
               snapshot.forEach(function (child) {
-                // console.log(snapshot.key);
+                // console.log(child.key);
                 if(child.key == "member0"){
+                  console.log(child.val());
                   o = child.val();
                   myUsersID.push(o);
+                  const nameRef = ref(db, "users/" + o + "/data");
+                onValue(nameRef, (snapshot) => {
+                  console.log("TO");
+                  console.log(snapshot.child("name").val());
+                  usernamesall.push(snapshot.child("name").val());
+                });
                 }
                 if(child.key == "member1"){
                   p = child.val();
@@ -462,18 +507,15 @@
                   time = child.val();
                 }
                 // console.log(o);
-                const nameRef = ref(db, "users/" + o + "/data");
-                onValue(nameRef, (snapshot) => {
-                  // console.log("TO");
-                  // console.log(snapshot.key);
-                });
+                
                 msg = new Message(
                   o,
-                  o,
+                  p,
                   text,
                   time,
                   snapshot.key
                 )
+                // console.log("PORUKA");
                 // console.log(msg);
               });
               var b = false;
@@ -489,6 +531,7 @@
               }
               if(!b){
                 // console.log(msg);
+                console.log(msg);
                 messages.push(msg);
               }
               
@@ -537,7 +580,7 @@
             window.location = "blocked.html";
         })
       function sortMessages() {
-        // console.log(messages);
+        console.log(messages);
         for (var i = 0; i < messages.length; i++) {
           //set min to the current iteration of i
           var min = i;
@@ -546,22 +589,36 @@
             // console.log(messages[j].time);
             // console.log(!newDate(messages[i].time, messages[j].time));
             if (!newDate(messages[i].time, messages[j].time)) {
+              // console.log(messages[i].time);
+              // console.log("MANJE OD ");
+              // console.log(messages[j].time);
               min = j;
+            }else{
+              console.log(messages[i].time);
+              console.log("VECE OD ");
+              console.log(messages[j].time);
             }
           }
           var temp = messages[i];
           messages[i] = messages[min];
           messages[min] = temp;
+          var temp1 = usernamesall[i];
+          usernamesall[i] = usernamesall[min];
+          usernamesall[min] = temp1;
         }
+        console.log("ovo su poruke");
         console.log(messages);
         // console.log(messages);
         for (var i = 0; i < messages.length; i++) {
           var name = "";
+          console.log("OVDE SAM");
+          console.log(messages[i].senderName);
           const starCountRef1 = ref(db, "users/"+messages[i].senderName);
           onValue(starCountRef1, (snapshot) => {
           snapshot.forEach(function (child) {
-            // console.log(child.key);
+            
             if(child.key == "data"){
+              
               name = child.child("name").val();
             }
             });
@@ -569,12 +626,15 @@
           var div = document.querySelector(".oneChat"),
             clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
           clone.setAttribute("sender", messages[i].chatID);
-          clone.children[0].children[0].innerHTML = name;
+          // console.log("OVO JE IME");
+          // console.log(name);
+          clone.children[0].children[0].innerHTML = usernamesall[i];
           clone.children[0].children[1].innerHTML = messages[i].time;
           clone.children[1].innerHTML = messages[i].text;
+          clone.classList.add("addBlock");
           document.getElementById("inboxContainer").appendChild(clone);
         }
-        document.getElementById("inboxContainer").firstElementChild.remove();
+        // document.getElementById("inboxContainer").firstElementChild.remove();
 
         // console.log(messages);
       }
@@ -586,6 +646,7 @@
         var second3 = second2[0].split("/");
         var first22 = first2[1].split(":");
         var second22 = second2[1].split(":");
+        // console.log(first22, second22);
         if (first3[2] > second3[2]) {
           return true;
         } else if (first3[2] < second3[2]) {
@@ -596,7 +657,11 @@
           } else if (first3[1] < second3[1]) {
             return false;
           } else {
+            // console.log(date1);
+            // console.log(date2);
             if (first3[0] > second3[0]) {
+              // console.log(first3[0]);
+              // console.log(second3[0]);
               return true;
             } else if (first3[0] < second3[0]) {
               return false;
@@ -607,17 +672,22 @@
                 return false;
               } else {
                 if (first22[1] > second22[1]) {
-                  console.log(first22[1]);
-                  console.log(second22[1]);
-                  console.log("PRVI JE VECI");
+                  // console.log(first22[1]);
+                  // console.log(second22[1]);
+                  // console.log("PRVI JE VECI");
                   return true;
                 } else if (first22[1] < second22[1]) {
-                  console.log(first22[1]);
-                  console.log(second22[1]);
-                  console.log("DRUGI JE VECI");
+                  // console.log(first22[1]);
+                  // console.log(second22[1]);
+                  // console.log("DRUGI JE VECI");
                   return false;
                 } else {
-                  return true;
+                  if(first22[2]>second22[2]){
+                    return true;
+                  }else{
+                    return false;
+                  }
+                  
                 }
               }
             }
