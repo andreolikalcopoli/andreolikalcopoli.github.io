@@ -173,14 +173,17 @@
             console.log(child.key);
             if(child.key == "name"){
               name = child.val();
-              localStorage.setItem('name', name);
-              localStorage.setItem('myID', email);
+              localStorage.setItem("name", name);
+              localStorage.setItem("myID", email);
               console.log(localStorage.getItem("name"));
               console.log(localStorage.getItem("myID"));
             }
           });
         });
+        setTimeout(
+          function(){
         window.location = "createPost.html";
+      },1500);
 
         // ...
       })

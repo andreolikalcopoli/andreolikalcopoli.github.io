@@ -461,7 +461,7 @@
             });
           });
         });
-        
+        console.log("LOKAL STORAGE " + localStorage.getItem("myID"));
         const starCountRef = ref(db, "userChats/"+localStorage.getItem("myID"));
         // console.log(localStorage.getItem("myID"));
         onValue(starCountRef, (snapshot) => {
@@ -473,7 +473,6 @@
           snapshot.forEach(function (child) {
             child.forEach(function(part){
               // console.log(part.val());
-            
             var msg;
             var p = "Me";
             var o = "me";
