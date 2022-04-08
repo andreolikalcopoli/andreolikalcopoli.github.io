@@ -56,8 +56,16 @@
           <div id="midBot">
             <div id="myMsg"><p class="poruka" id="myMsgP"></p></div>
             <div id="notMyMsg"><p class="poruka" id="notMyMsgP"></p></div>
-            <img class="imageMsg" id="myImageMsg">
-            <img class="imageMsg" id="notMyImageMsg">
+            <div class="imageMsg" id="myImageMsg">
+              <img src="images/file.svg" class="imageMsgImg">
+              <p></p>
+            </div>
+            <!-- <p class="imageMsgH" id="myImageMsgH">a</p> -->
+            <div class="imageMsg" id="notMyImageMsg">
+              <img src="images/file.svg" class="imageMsgImg">
+              <p></p>
+            </div>
+            <!-- <p class="imageMsgH" id="notMyImageMsgH">a</p> -->
           </div>
           <div id="botBot">
             <input id="writeMessage" placeholder="Write a message..." />
@@ -272,6 +280,10 @@
         cursor: pointer;
         /* display: block !important; */
       }
+      .imageMsgImg{
+        width: 100px;
+        height: 100px;
+      }
       #myImageMsg{
         display: flex;
         margin-left: 90%;
@@ -446,7 +458,7 @@
         var datab = getDatabase();
         id = window.location.href.split("?")[1];
         if(id == localStorage.getItem("myID")){
-          console.log("TO SAM JA");
+          // console.log("TO SAM JA");
           const starCountRef = ref_database(datab, "doctors/" + id + "/messages");
         var brojac = 0;
         onValue(starCountRef, (snapshot) => {
@@ -480,10 +492,11 @@
           function(){
             for(var i = 0; i < urls.length; i++){
               if(urls[i].includes(".png") || urls[i].includes(".jpg") || urls[i].includes(".jpeg") || urls[i].includes(".svg")){
-                  console.log("OVO JE I "+i);
-                  collection[i+2].setAttribute('src', urls[i]);
+                  // console.log("OVO JE I "+i);
+                  console.log(collection[i+2].children[0]);
+                  collection[i+2].children[0].setAttribute('src', urls[i]);
                 }else{
-                  collection[i+2].setAttribute('src', "images/file.svg");
+                  collection[i+2].children[0].setAttribute('src', "images/file.svg");
                 }
             }
           },2000);
@@ -522,7 +535,7 @@
               child.child("text").val(),
               child.child("time").val()
             );
-            console.log(msg);
+            // console.log(msg);
             messages.push(msg);
             // console.log(messages);
             // } else {
@@ -543,7 +556,7 @@
                 clone = div.cloneNode(true);
               }
                 // clone.setAttribute("src", "images/"+fajlIme);
-                clone.style.display = "block";
+                clone.style.display = "flex";
                 if(brojac%2!=0){
                   document.getElementById("midBot").appendChild(clone);
                 }
@@ -551,16 +564,16 @@
               var tekstRef = messages[messages.length-1].text;
               setTimeout(
               function() {
-                console.log(clone);
+                // console.log(clone);
                 const starsRef = ref_storage(storage, tekstRef);
                 getDownloadURL(starsRef)
               .then((url) => {
                 if(url.includes(".png") || url.includes(".jpg") || url.includes(".jpeg") || url.includes(".svg")){
-                clone.setAttribute('src', url);
-                clone.setAttribute('link', "a");
+                clone.children[0].setAttribute('src', url);
+                clone.children[0].setAttribute('link', "a");
                 }else{
-                  clone.setAttribute('link', url);
-                  clone.setAttribute('src', "images/file.svg");
+                  clone.children[0].setAttribute('link', url);
+                  clone.children[0].setAttribute('src', "images/file.svg");
                 }
                 counter++;
               })
@@ -594,8 +607,8 @@
           setTimeout(sortMessages, 2000);
       });
       function writeMessage(text, time, sender, senderName) {
-        console.log("POZVAO SAM SE I TEKST JE ");
-        console.log(text);
+        // console.log("POZVAO SAM SE I TEKST JE ");
+        // console.log(text);
         var db = getDatabase();
         if(id != localStorage.getItem("myID")){
           if(ifPost){
@@ -687,9 +700,9 @@
         getDownloadURL(starsRef)
               .then((url) => {
                 if(url.includes(".png") || url.includes(".jpg") || url.includes(".jpeg") || url.includes(".svg")){
-                  clone.setAttribute('src', url);
+                  clone.children[0].setAttribute('src', url);
                 }else{
-                  clone.setAttribute('src', "images/file.svg");
+                  clone.children[0].setAttribute('src', "images/file.svg");
                 }
                 
               })
@@ -771,8 +784,8 @@
             var final = day + "/" + month + "/" + year + " " + hour + ":" + min + ":" + seconds;
             var storageRef;
             if(ifImage){
-              console.log(ifImage);
-              console.log("OVO JE IF IMAGE");
+              // console.log(ifImage);
+              // console.log("OVO JE IF IMAGE");
               writeMessage("/chat/"+id+"/images/",final,localStorage.getItem('myID'),localStorage.getItem('name'));
               // storageRef = ref_storage(storage, 'chat/'+id+"/images/"+"aaa");
             }else{
@@ -902,9 +915,11 @@
         // messages.reverse();
         // console.log(messages);
         var counter = 0;
+        var all;
         for (var i = 0; i < messages.length; i++) {
           if(messages[i].text.startsWith("/chat/")){
-            console.log(messages[i].text);
+            // console.log(messages[i].text);
+              all = messages[i].text.split("/");
               const starsRef = ref_storage(storage, messages[i].text);
               if(messages[i].sender == localStorage.getItem("myID")){
                 var div = document.getElementById("myImageMsg"),
@@ -914,7 +929,7 @@
                 clone = div.cloneNode(true);
               }
               
-                clone.style.display = "block";
+                clone.style.display = "flex";
                 document.getElementById("midBot").appendChild(clone);
               if(messages[i].sender == localStorage.getItem("myID")){
                 getDownloadURL(starsRef)
@@ -923,11 +938,18 @@
                 // console.log(collection);
                 // console.log("USO");
                 if(url.includes(".png") || url.includes(".jpg") || url.includes(".jpeg") || url.includes(".svg")){
-                collection[counter + 2].setAttribute('src', url);
-                collection[counter + 2].setAttribute('link', "a");
+                collection[counter + 2].children[0].setAttribute('src', url);
+                collection[counter + 2].children[0].setAttribute('link', "a");
                 }else{
-                  collection[counter + 2].setAttribute('link', url);
-                  collection[counter + 2].setAttribute('src', "images/file.svg");
+                  collection[counter + 2].children[0].setAttribute('link', url);
+                  collection[counter + 2].children[0].setAttribute('src', "images/file.svg");
+                  // var all = messages[i].text;
+                  // console.log(all);
+                  var a = url.split("?alt");
+                  var hover = a[0].split("2F");
+                  hover = hover[hover.length-1];
+                  collection[counter + 2].children[0].setAttribute('hover', hover);
+                  collection[counter+2].children[1].innerHTML = hover;
                 }
                 counter++;
                 
@@ -936,17 +958,25 @@
               });
 
               }else{
+                var msgNow = messages[i].text;
                 getDownloadURL(starsRef)
               .then((url) => {
                 const collection = document.getElementsByClassName("imageMsg");
                 // console.log(collection);
-                // console.log("USO");
+                // console.log(messages[i].text);
                 if(url.includes(".png") || url.includes(".jpg") || url.includes(".jpeg") || url.includes(".svg")){
-                collection[counter + 2].setAttribute('src', url);
-                collection[counter + 2].setAttribute('link', "a");
+                collection[counter + 2].children[0].setAttribute('src', url);
+                collection[counter + 2].children[0].setAttribute('link', "a");
+                console.log("OVDE SAM");
                 }else{
-                  collection[counter + 2].setAttribute('download', url);
-                  collection[counter + 2].setAttribute('src', "images/file.svg");
+                  collection[counter + 2].children[0].setAttribute('download', url);
+                  collection[counter + 2].children[0].setAttribute('src', "images/file.svg");
+                  console.log("TU SAM");
+                  var a = url.split("?alt");
+                  var hover = a[0].split("2F");
+                  hover = hover[hover.length-1];
+                  collection[counter + 2].children[0].setAttribute('hover', hover);
+                  collection[counter+2].children[1].innerHTML = hover;
                 }
                 counter++;
               })
@@ -955,7 +985,7 @@
               }
               
             }else{
-              console.log(messages[i].text);
+              // console.log(messages[i].text);
           if (messages[i].sender == localStorage.getItem("myID")) {
             var div = document.getElementById("myMsg"),
               clone = div.cloneNode(true);
@@ -985,7 +1015,7 @@
     link.click();
     document.body.removeChild(link);
 }
-      $(document).on("click", ".imageMsg", function(){
+      $(document).on("click", ".imageMsgImg", function(){
         downloadURI(this.getAttribute('download'), "aa");
         // browser.downloads.download({url: "https://example.org/image.png"})
         // download(this.getAttribute("download"),"aaa");
@@ -1002,7 +1032,7 @@
         // }
         const starCountRef = ref_database(db, "chat/" + id + "/pinnedMessages");
         onValue(starCountRef, (snapshot) => {
-          console.log(snapshot.val());
+          // console.log(snapshot.val());
           snapshot.forEach(function (child) {
             child.forEach(function (part) {
               part.forEach(function (partic){

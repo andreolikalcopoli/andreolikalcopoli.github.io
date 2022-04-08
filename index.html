@@ -188,10 +188,10 @@
         // ...
       })
       .catch((error) => {
-        // alert("Wrong CPF or password");
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log(errorMessage);
+        alert("Invalid CPF or password. Try again!");
       });
     }
       $("#register").click(function(){
