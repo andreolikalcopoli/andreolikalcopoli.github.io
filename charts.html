@@ -33,9 +33,12 @@
           </div>
         </div>
         <div id="inboxContainer">
+            <div id="weekMonthTop">
+                <div id="week" class="weekMonth">Week</div>
+                <div id="month" class="weekMonth">Month</div>
+            </div>
             <div id="namesTop">
                 <div class="nameTop"></div>
-
             </div>
             <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
 
@@ -84,6 +87,30 @@
           height: 50px;
           display: flex;
           overflow-x: scroll;
+      }
+      #weekMonthTop{
+        width: 70vw;
+          height: 50px;
+          display: flex;
+          overflow-x: scroll;
+      }
+      .weekMonth{
+          margin: 20px;
+          cursor: pointer;
+          color: #4c9dfb;
+          font-weight: bold;
+          width: 100px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 15px;
+          /* display: none; */
+      }
+      .addWM{
+        background-color: #4c9dfb;
+          border-radius: 5px;
+        padding: 15px;
+        color: white;
       }
       .nameTop{
           margin: 20px;
@@ -301,8 +328,10 @@
       var multipleDlt = [];
       var myUsersID = [];
       var usernamesall = [];
+      var weekMonth = "week";
       var db = getDatabase();
       $(document).ready(function () {
+          document.getElementById("week").classList.add("addWM");
         document.getElementById("myselfChat").children[0].children[0].innerHTML = localStorage.getItem("name");
         function writeMessageToMultipleUsers(text, time, sender, senderName) {
           
@@ -425,7 +454,7 @@
         });
         $(document).on("click", ".addBlock", function () {
             var k = this.innerHTML;
-            const refCharts = ref(db, "users/"+userovID + "/fit/week");
+            const refCharts = ref(db, "users/"+userovID + "/fit/"+weekMonth);
             onValue(refCharts, (snapshot) => {
           snapshot.forEach(function (child){
             var p = 0;
@@ -440,7 +469,12 @@
                     }
                 }
                 if(p == 4 && b){
-                    var xValues = [0,1,2,3,4,5,6];
+                    var xValues = [];
+                    if(weekMonth == "week"){
+                        xValues = [1,2,3,4,5,6,7];
+                    }else{
+                        xValues = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
+                    }
                     var yValues = [];
                     // console.log(part.val());
                     var min = 10000000;
@@ -676,6 +710,16 @@
         });
         setTimeout(sortMessages, 2500);
       });
+      $("#week").click(function(){
+            document.getElementById("week").classList.add("addWM");
+            document.getElementById("month").classList.remove("addWM");
+            weekMonth = "week";
+        })
+        $("#month").click(function(){
+            document.getElementById("month").classList.add("addWM");
+            document.getElementById("week").classList.remove("addWM");
+            weekMonth = "month";
+        })
       $("#chat").click(function(){
             window.location = "inbox.html";
         })
