@@ -4,6 +4,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
     <link
       href="https://fonts.googleapis.com/css?family=Poppins"
       rel="stylesheet"
@@ -32,6 +33,13 @@
           </div>
         </div>
         <div id="inboxContainer">
+            <div id="namesTop">
+                <div class="nameTop"></div>
+
+            </div>
+            <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+
+
           <div id="myselfChat">
             <div class="topChat">
               <div class="name"></div>
@@ -63,10 +71,26 @@
       }
       #botBot {
         flex: 1;
-        display: flex;
+        display: none;
         margin: 10px;
         width: 90%;
         height: 50px;
+      }
+      #myChart{
+          margin-top: 100px;
+      }
+      #namesTop{
+          width: 70vw;
+          height: 50px;
+          display: flex;
+          overflow-x: scroll;
+      }
+      .nameTop{
+          margin: 20px;
+          cursor: pointer;
+          color: #4c9dfb;
+          font-weight: bold;
+          display: none;
       }
       #myselfChat{
         background-color: lightgrey;
@@ -75,6 +99,7 @@
         margin-bottom: 10px;
         font-family: "Poppins";
         cursor: pointer;
+        display: none;
       }
       #writeMessage {
         flex: 6;
@@ -193,7 +218,7 @@
         height: 85%;
         margin-left: 5%;
         display: inline-block;
-        overflow-y: scroll;
+        /* overflow-y: scroll; */
         margin-top: 30px;
       }
       .oneChat {
@@ -345,31 +370,118 @@
           deleteBool = !deleteBool;
 
         });
+        
+        var userovID = "";
         $(document).on("click", ".oneUser", function () {
+            const boxes = document.querySelectorAll('.addBlock');
+            boxes.forEach(box => {
+            box.remove();
+            });
+            userovID = this.getAttribute("userid");
+            const refCharts = ref(db, "users/"+this.getAttribute("userid") + "/fit/week");
+            onValue(refCharts, (snapshot) => {
+          snapshot.forEach(function (child){
+            // console.log(snapshot.val());
+            var p = 0;
+            child.forEach(function (part){
+                p++;
+                    if(p == 2){
+                        var div = document.querySelector(".nameTop"),
+                        clone = div.cloneNode(true);
+                        clone.innerHTML = part.val();
+                        clone.classList.add("addBlock");
+                        document.getElementById("namesTop").appendChild(clone);
+                    }
+                    if(p==4){
+                        console.log("P JE 4");
+                        console.log(part.val());
+                    }
+                    });
+                });
+            });
+        //   var d = new Date();
+        //     var day = d.getDate();
+        //     var month = d.getMonth() + 1;
+        //     var year = d.getFullYear();
+        //     var hour = d.getHours();
+        //     var min = d.getMinutes();
+        //     var seconds = d.getSeconds();
+        //     var final = day + "/" + month + "/" + year + " " + hour + ":" + min + ":" + seconds;
 
-          var d = new Date();
-            var day = d.getDate();
-            var month = d.getMonth() + 1;
-            var year = d.getFullYear();
-            var hour = d.getHours();
-            var min = d.getMinutes();
-            var seconds = d.getSeconds();
-            var final = day + "/" + month + "/" + year + " " + hour + ":" + min + ":" + seconds;
+        //   var p = set(ref(db, "infoChat/"+this.getAttribute("userid")), {
+        //     lastMessage: localStorage.getItem("myID"),
+        //     lastMessageText: "",
+        //     lastMsgTime: final,
+        //     member0: this.getAttribute("userID"),
+        //     member1: localStorage.getItem("myID")
+        //   });
+        //   // var o = p.key
+        //   var o = this.getAttribute("userid");
+        //   console.log(this.getAttribute("userid"));
+        //   push(ref(db, "userChats/"+localStorage.getItem("myID")),{
+        //     k: o
+        //   });
+        //   window.location = "chat.html?" + this.getAttribute("userid");
+        });
+        $(document).on("click", ".addBlock", function () {
+            var k = this.innerHTML;
+            const refCharts = ref(db, "users/"+userovID + "/fit/week");
+            onValue(refCharts, (snapshot) => {
+          snapshot.forEach(function (child){
+            var p = 0;
+            var b = false;
+            child.forEach(function (part){
+                p++;
+                if(p == 2){
+                    if(part.val() == k){
+                        console.log("TOETO");
+                        console.log(part.val());
+                        b = true;
+                    }
+                }
+                if(p == 4 && b){
+                    var xValues = [0,1,2,3,4,5,6];
+                    var yValues = [];
+                    // console.log(part.val());
+                    var min = 10000000;
+                    var max = 0;
+                    for(var i = 0; i < part.val().length; i++){
+                        // xValues.push(i);
+                        yValues.push(part.val()[i]);
+                        if(part.val()[i] < min){
+                            min = part.val()[i];
+                        }
+                        if(part.val()[i] > max){
+                            max = part.val()[i];
+                        }
+                    }
+                console.log(xValues);
 
-          var p = set(ref(db, "infoChat/"+this.getAttribute("userid")), {
-            lastMessage: localStorage.getItem("myID"),
-            lastMessageText: "",
-            lastMsgTime: final,
-            member0: this.getAttribute("userID"),
-            member1: localStorage.getItem("myID")
-          });
-          // var o = p.key
-          var o = this.getAttribute("userid");
-          console.log(this.getAttribute("userid"));
-          push(ref(db, "userChats/"+localStorage.getItem("myID")),{
-            k: o
-          });
-          window.location = "chat.html?" + this.getAttribute("userid");
+        new Chart("myChart", {
+        type: "line",
+        data: {
+            labels: xValues,
+            datasets: [{
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(0,0,255,1.0)",
+            borderColor: "rgba(0,0,255,0.1)",
+            data: yValues
+            }]
+        },
+        options: {
+            legend: {display: false},
+            scales: {
+            yAxes: [{ticks: {min: min, max:max}}],
+            }
+        }
+        });
+                }
+                    });
+
+                
+                });
+            });
         });
         $(document).on("click", "#myselfChat",function(){
           window.location = "chat.html?" + localStorage.getItem("myID");
@@ -417,15 +529,15 @@
         var imBlocked = [];
         const db = getDatabase();
         const imBlockedRef = ref(db, "users");
-        onValue(imBlockedRef, (snapshot) => {
-          snapshot.forEach(function (child){
-            child.forEach(function (part){
-              if(part.key == "blocked"){
-                imBlocked.push(part.val());
-              }
-            });
-          });
-        });
+        // onValue(imBlockedRef, (snapshot) => {
+        //   snapshot.forEach(function (child){
+        //     child.forEach(function (part){
+        //       if(part.key == "blocked"){
+        //         imBlocked.push(part.val());
+        //       }
+        //     });
+        //   });
+        // });
         setTimeout(
     function() {
         onValue(imBlockedRef, (snapshot) => {
@@ -434,16 +546,16 @@
               part.forEach(function (partic){
                 if(partic.key == "name"){
                   // console.log(myUsersID);
-                  if (myUsersID.indexOf(child.key) > -1) {
-                      // console.log("POSTOJI");
-                  } else {
+                //   if (myUsersID.indexOf(child.key) > -1) {
+                //       console.log("POSTOJI");
+                //   } else {
                     var name = partic.val();
                     var div = document.querySelector(".oneUser"),
                     clone = div.cloneNode(true); // true means clone all childNodes and all event handlers
                     clone.setAttribute("userid", child.key);
                     clone.children[0].innerHTML = name;
                     document.getElementById("allUsersContainer").appendChild(clone);
-                  }
+                //   }
                   
                 }
               });
@@ -455,13 +567,13 @@
     },1000);
 
         const blockedRef = ref(db, "doctors/" + localStorage.getItem("myID") + "/blocked");
-        onValue(blockedRef, (snapshot) => {
-          snapshot.forEach(function (child) {
-            child.forEach(function (part) {
-              blockedUsers.push(part.val());
-            });
-          });
-        });
+        // onValue(blockedRef, (snapshot) => {
+        //   snapshot.forEach(function (child) {
+        //     child.forEach(function (part) {
+        //       blockedUsers.push(part.val());
+        //     });
+        //   });
+        // });
         console.log("LOKAL STORAGE " + localStorage.getItem("myID"));
         const starCountRef = ref(db, "userChats/"+localStorage.getItem("myID"));
         // console.log(localStorage.getItem("myID"));
@@ -634,7 +746,7 @@
           clone.children[0].children[0].innerHTML = usernamesall[i];
           clone.children[0].children[1].innerHTML = messages[i].time;
           clone.children[1].innerHTML = messages[i].text;
-          clone.classList.add("addBlock");
+        //   clone.classList.add("addBlock");
           document.getElementById("inboxContainer").appendChild(clone);
         }
         // document.getElementById("inboxContainer").firstElementChild.remove();
@@ -697,6 +809,9 @@
           }
         }
       }
+
+      
+
       class Message {
         constructor(sender, senderName, text, time, chatID) {
           this.sender = sender;
