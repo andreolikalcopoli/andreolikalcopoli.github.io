@@ -334,7 +334,7 @@
           document.getElementById("week").classList.add("addWM");
         document.getElementById("myselfChat").children[0].children[0].innerHTML = localStorage.getItem("name");
         function writeMessageToMultipleUsers(text, time, sender, senderName) {
-          
+          console.log("a");
         for(var i = 0; i < multipleMsg.length; i++){
           push(ref(db, "chat/" + multipleMsg[i] + "/messages"), {
             sender: sender,
